@@ -21,7 +21,7 @@ class App extends React.Component {
     {name: 'SAIC Motor Corporation', symbol: '600104.SHH'},
     {name: 'China Vanke Company Ltd', symbol: '000002.SHZ'}
     ]
-
+// After the component was rendered to the DOM we call lifecycle method componentDidMount which calls getAllData
   componentDidMount() {
     this.getAllData();
   }
@@ -47,9 +47,11 @@ class App extends React.Component {
 
         return res.json();
   }
-
+// this method loops through the array of company's name and their symbols, sends requests with specific symbol as query parameter to the Api via getData method. 
+// As a result we get object with information about daily prices.
+// Also I use Promise.all to wait all request are done and then pass each object I recieved to the getValues method which transform an object to an array of objects
   getAllData = () => {
-    const requests = this.symbols.map(async item => {
+    const requests = this.symbols.slice(0, 5).map(async item => {
         return {
             name: item.name,
             responce: await this.getData(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${item.symbol}&outputsize=compact&apikey=${this.apiKey}`)
@@ -58,8 +60,19 @@ class App extends React.Component {
     Promise.all(requests)
         .then(res => res.map(item => this.getValues(item)))
         .then(res => this.dataLoaded(res))
+    setTimeout(() => {
+        const requests = this.symbols.slice(5).map(async item => {
+            return {
+                name: item.name,
+                responce: await this.getData(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${item.symbol}&outputsize=compact&apikey=${this.apiKey}`)
+            }
+        })
+        Promise.all(requests)
+            .then(res => res.map(item => this.getValues(item)))
+            .then(res => this.dataLoaded(res))
+    }, 61000)
   }
-
+// getValues recieves object as a parameter and returns array of objects with fields that we need, company's name, specific day and close price. 
   getValues = (object) => {
     const arr = [];
     const name = object.name;
@@ -73,13 +86,18 @@ class App extends React.Component {
     return arr;
   }
   
+  // When all data are recieved and transformed the dataLoaded is called and then updates the state to actual data.
+  // Loading sets to false in order to replace Spinner with recieved data on the web page.
+   
   dataLoaded = (data) => {
     this.setState({
-        data,
+        data: [...this.state.data, ...data],
         loading: false
     })
   }
 
+  // renderItems is used to render a list of items and helps us not repeat the same code.
+  // I use it in render method
   renderItems = (data) => {
     const items = data.map((item, i) => {
       item.reverse();
@@ -104,6 +122,7 @@ class App extends React.Component {
   }
 
   render() {
+      // I use destruction to get fields from the state.
     const {data, loading} = this.state;
     const items = this.renderItems(data);
 
@@ -120,6 +139,7 @@ class App extends React.Component {
             
               {load}
               {content}
+              {data.length === 8 ? content : <Spinner/>}
             
           </div>
         </div>
