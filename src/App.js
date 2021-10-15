@@ -4,12 +4,16 @@ import Spinner from './spinner/Spinner';
 
 import './App.scss';
 
+
+// Application Programming Interface let our products or services communicate with other products and services 
+// without having to know how they are implemented. We send the request to the API and tell what we want to recieve.
+// API get our request, interprets it, performs necessary actions and sends it back to our application in a readable way.
 class App extends React.Component {
   state = {
     data: [],
     loading: true
   }
-
+// class properties that store information about company's symbol I will use to create endpoint
   apiKey = 'LW15KDPWT4NF50TB';
   symbols = [
     {name: 'Tesco London', symbol: 'TSCO.LON'},
@@ -72,7 +76,7 @@ class App extends React.Component {
             .then(res => this.dataLoaded(res))
     }, 61000)
   }
-// getValues recieves object as a parameter and returns array of objects with fields that we need, company's name, specific day and close price. 
+// getValues recieves an object as a parameter and returns array of objects with properties that we need, company's name, specific day and close price. 
   getValues = (object) => {
     const arr = [];
     const name = object.name;
@@ -96,7 +100,7 @@ class App extends React.Component {
     })
   }
 
-  // renderItems is used to render a list of items and helps us not repeat the same code.
+  // renderItems is used to create a list of items and helps us not repeat the same code.
   // I use it in render method
   renderItems = (data) => {
     const items = data.map((item, i) => {
@@ -122,11 +126,12 @@ class App extends React.Component {
   }
 
   render() {
-      // I use destruction to get fields from the state.
+// I use destruction to get properties from the state.
     const {data, loading} = this.state;
     const items = this.renderItems(data);
-
+// if data aren't recieved loading is true so we get Spinner in load variable;
     const load = loading ? <Spinner /> : null;
+// when data are recieved loading is false so we get array of elements in content variable or null if data aren't recieved
     const content = !loading ? items : null;
 
     return (
@@ -139,7 +144,7 @@ class App extends React.Component {
             
               {load}
               {content}
-              {data.length === 8 ? content : <Spinner/>}
+              {data.length === 8 ? null : <Spinner/>}
             
           </div>
         </div>
